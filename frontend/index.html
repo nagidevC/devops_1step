@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Manager</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; }
+        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        .task { border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .delete { background: #f44336; margin-left: 10px; }
+        .edit { background: #ffc107; }
+    </style>
+</head>
+<body>
+    <h1>Task Manager</h1>
+
+    <h2>Create New Task</h2>
+    <form id="createForm">
+        <input type="text" id="title" placeholder="Title" required>
+        <textarea id="description" placeholder="Description"></textarea>
+        <button type="submit">Create Task</button>
+    </form>
+
+    <h2>Tasks</h2>
+    <div id="tasksList"></div>
+
+    <script>
+        const apiUrl = '/api/tasks';
+
+        // Загрузить и отобразить все задачи
+        async function loadTasks() {
+            const res = await fetch(apiUrl);
+            const tasks = await res.json();
+            const list = document.getElementById('tasksList');
+            list.innerHTML = '';
+            tasks.forEach(task => {
+                const div = document.createElement('div');
+                div.className = 'task';
+                div.innerHTML = `
+                    <strong>${task.title}</strong>
+                    <p>${task.description || ''}</p>
+                    <button class="edit" onclick="editTask(${task.id})">Edit</button>
+                    <button class="delete" onclick="deleteTask(${task.id})">Delete</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // Создать задачу
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            await fetch(apiUrl, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title, description})
+            });
+            document.getElementById('createForm').reset();
+            loadTasks();
+        });
+
+        // Удалить задачу
+        window.deleteTask = async (id) => {
+            await fetch(`${apiUrl}/${id}`, {method: 'DELETE'});
+            loadTasks();
+        };
+
+        // Редактировать задачу (простой prompt для демонстрации)
+        window.editTask = async (id) => {
+            const newTitle = prompt('Enter new title:');
+            if (newTitle === null) return;
+            const newDescription = prompt('Enter new description:');
+            await fetch(`${apiUrl}/${id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title: newTitle, description: newDescription || ''})
+            });
+            loadTasks();
+        };
+
+        // Первоначальная загрузка
+        loadTasks();
+    </script>
+</body>
+</html>
