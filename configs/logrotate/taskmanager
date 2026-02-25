@@ -1,0 +1,13 @@
+/var/log/taskmanager/*.log {
+    daily
+    missingok
+    rotate 7
+    compress
+    delaycompress
+    notifempty
+    create 644 ilham ilham
+    sharedscripts
+    postrotate
+        systemctl reload taskmanager > /dev/null 2>&1 || true
+    endscript
+}
