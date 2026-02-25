@@ -1,0 +1,22 @@
+[Unit]
+Description=Task Manager Flask App
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+User=ilham
+Group=ilham
+WorkingDirectory=/home/ilham/devops-1step
+Environment="PATH=/home/ilham/devops-1step/venv/bin"
+EnvironmentFile=/home/ilham/devops-1step/.env
+ExecStart=/home/ilham/devops-1step/venv/bin/python -m app.app
+Restart=always
+RestartSec=10
+
+#вывод логов в файлы
+StandardOutPut=append:/var/log/taskmanager/app.log
+StandardError=append:/var/log/taskmanager/app.log
+#можно разделить на 2 файла, но направим оба вывода в один файл
+
+[Install]
+WantedBy=multi-user.target
